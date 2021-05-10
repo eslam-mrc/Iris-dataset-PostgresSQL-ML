@@ -1,0 +1,33 @@
+CREATE TABLE flower_dim(
+id SERIAL,
+sepalLength DECIMAL,
+sepalWidth DECIMAL,
+petalLength DECIMAL,
+petalWidth DECIMAL
+)
+
+CREATE TABLE flower_type(
+sepalLength DECIMAL,
+sepalWidth DECIMAL,
+petalLength DECIMAL,
+petalWidth DECIMAL,
+prediction VARCHAR(40)
+)
+
+CREATE LANGUAGE plpythonu;
+
+--Creating a function that can be used inside a trigger to run the python script.
+CREATE FUNCTION getPrediction()
+RETURNS trigger
+LANGUAGE plpythonu
+AS $$
+import subprocess
+subprocess.call(['/home/eslam/anaconda3/bin/python', '/home/eslam/Downloads/Task5/call-python.py'])
+$$
+
+--Creating trigger that runs when a new row is inserted in flower_dim table and inserts flower dimensions and predicted type in flower_type table.
+CREATE TRIGGER GetFlowerType
+  AFTER INSERT
+  ON flower_dim
+  FOR EACH ROW
+  EXECUTE PROCEDURE getPrediction();
